@@ -10,7 +10,7 @@ namespace CompositePattern
             // Ejemplo para la definición del patrón
             PintarUnArbol();
 
-            // Ejemplo real de costes
+            // Ejemplo de costes
             CalcularCostesDeUnProductoFormadoPorOtrosProductos();
 
             Console.ReadLine();
@@ -100,22 +100,22 @@ namespace CompositePattern
             Console.WriteLine(conjuntoB.CalcularCoste());
         }
 
-        private static Conjunto CrearConjuntoB()
+        private static Componente CrearConjuntoB()
         {
             var referenciaB = new Referencia("B", 4);
-            var conjuntoB = new Conjunto(referenciaB);
+            var conjuntoB = new Componente(referenciaB);
 
             var referenciaB1 = new Referencia("B1", 1);
-            var piezaB1 = new Pieza(referenciaB1);
+            var piezaB1 = new Componente(referenciaB1);
 
             var referenciaB2 = new Referencia("B2", 2);
-            var conjuntoB2 = new Conjunto(referenciaB2);
+            var conjuntoB2 = new Componente(referenciaB2);
 
             var referenciaB21 = new Referencia("B21", 1);
-            var piezaB21 = new Pieza(referenciaB21);
+            var piezaB21 = new Componente(referenciaB21);
 
             var referenciaB22 = new Referencia("B22", 2);
-            var piezaB22 = new Pieza(referenciaB22);
+            var piezaB22 = new Componente(referenciaB22);
 
             conjuntoB2.Añadir(4, piezaB21);
             conjuntoB2.Añadir(2, piezaB22);
@@ -142,24 +142,10 @@ namespace CompositePattern
             public decimal Coste { get; }
         }
 
-        public abstract class ComponenteProducto
-        {
-            public virtual void Añadir(int cantidad, ComponenteProducto componente)
+            public class Componente
             {
-                throw new NotImplementedException();
-            }
-
-            public virtual void Quitar(ComponenteProducto componente)
-            {
-                throw new NotImplementedException();
-            }
-            public abstract decimal CalcularCoste();
-        }
-
-        public class Conjunto : ComponenteProducto
-        {
-            private readonly Referencia _referencia;
-            private readonly List<ComponenteProducto> _subComponentes;
+                private readonly Referencia _referencia;
+                private readonly List<Componente> _subComponentes;
 
 
             public string Nombre
@@ -167,13 +153,13 @@ namespace CompositePattern
                 get { return _referencia.Nombre;  }
             }
 
-            public Conjunto(Referencia referencia)
+            public Componente(Referencia referencia)
             {
                 _referencia = referencia;
-                _subComponentes = new List<ComponenteProducto>();
+                _subComponentes = new List<Componente>();
             }
             
-            public override void Añadir(int cantidad, ComponenteProducto componente)
+            public void Añadir(int cantidad, Componente componente)
             {
                 for (int i = 0; i < cantidad; i++)
                 {
@@ -181,12 +167,12 @@ namespace CompositePattern
                 }
             }
 
-            public override void Quitar(ComponenteProducto componente)
+            public void Quitar(Componente componente)
             {
                 _subComponentes.Remove(componente);
             }
             
-            public override decimal CalcularCoste()
+            public decimal CalcularCoste()
             {
                 decimal coste = _referencia.Coste;
 
@@ -198,20 +184,6 @@ namespace CompositePattern
                 return coste;
             }
         }
-
-        public class Pieza : ComponenteProducto
-        {
-            private readonly Referencia _referencia;
-
-            public Pieza(Referencia referencia)
-            {
-                _referencia = referencia;
-            }
-
-            public override decimal CalcularCoste()
-            {
-                return _referencia.Coste;
-            }
-        }
+        
     }
 }
