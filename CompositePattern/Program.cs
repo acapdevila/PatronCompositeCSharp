@@ -10,12 +10,21 @@ namespace CompositePattern
             // Ejemplo para la definición del patrón
             PintarUnArbol();
 
-            // Ejemplo de costes
-            CalcularCostesDeUnProductoFormadoPorOtrosProductos();
+            // Ejemplo de costes Intento 1
+            CalcularCostesDeUnProductoIntento1();
+
+            // Ejempo de costes Intento 2
+            CalcularCostesDeUnProductoIntento2();
+
+            // Ejempo de costes Intento 3
+            CalcularCostesDeUnProductoIntento3();
+
 
             Console.ReadLine();
         }
-        
+
+        #region Ejemplo clásico
+
         private static void PintarUnArbol()
         {
             var troncoArbol = new Rama();
@@ -38,27 +47,22 @@ namespace CompositePattern
 
             troncoArbol.Pintar(1);
 
-            
+
         }
 
         public abstract class ComponenteArbol
         {
-            public virtual void Brotar(ComponenteArbol componente)
-            {
-                throw new NotImplementedException();
-            }
+            public abstract void Brotar(ComponenteArbol componente);
 
-            public virtual void Cortar(ComponenteArbol componente)
-            {
-                throw new NotImplementedException();
-            }
+            public abstract void Cortar(ComponenteArbol componente);
+
             public abstract void Pintar(int nivel);
         }
-        
+
         public class Rama : ComponenteArbol
         {
             private readonly List<ComponenteArbol> _componentes;
-            
+
             public Rama()
             {
                 _componentes = new List<ComponenteArbol>();
@@ -80,44 +84,59 @@ namespace CompositePattern
 
                 foreach (ComponenteArbol hojaORama in _componentes)
                 {
-                   hojaORama.Pintar(nivel + 1);
+                    hojaORama.Pintar(nivel + 1);
                 }
             }
         }
         public class Hoja : ComponenteArbol
         {
+            public override void Brotar(ComponenteArbol componente)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Cortar(ComponenteArbol componente)
+            {
+                throw new NotImplementedException();
+            }
+
             public override void Pintar(int nivel)
             {
                 Console.WriteLine(new String('-', nivel) + " hoja");
             }
         }
 
-        private static void CalcularCostesDeUnProductoFormadoPorOtrosProductos()
+        #endregion
+
+
+        #region Ejemplo primer intento
+
+        private static void CalcularCostesDeUnProductoIntento1()
         {
             var conjuntoB = CrearConjuntoB();
-            
+
             Console.WriteLine("Coste de " + conjuntoB.Nombre + ":");
-            Console.WriteLine(conjuntoB.CalcularCoste());
+            Console.WriteLine(conjuntoB.CalcularCoste(1));
         }
 
-        private static Componente CrearConjuntoB()
+        private static Conjunto CrearConjuntoB()
         {
-            var referenciaB = new Referencia("B", 4);
-            var conjuntoB = new Componente(referenciaB);
+            var referenciaB = new Referencia("B", coste: 4);
+            var conjuntoB = new Conjunto(referenciaB);
 
-            var referenciaB1 = new Referencia("B1", 1);
-            var piezaB1 = new Componente(referenciaB1);
+            var referenciaB1 = new Referencia("B1", coste: 1);
+            var piezaB1 = new Pieza(referenciaB1);
 
-            var referenciaB2 = new Referencia("B2", 2);
-            var conjuntoB2 = new Componente(referenciaB2);
+            var referenciaB2 = new Referencia("B2", coste: 2);
+            var conjuntoB2 = new Conjunto(referenciaB2);
 
-            var referenciaB21 = new Referencia("B21", 1);
-            var piezaB21 = new Componente(referenciaB21);
+            var referenciaB21 = new Referencia("B21", coste: 1);
+            var piezaB21 = new Pieza(referenciaB21);
 
-            var referenciaB22 = new Referencia("B22", 2);
-            var piezaB22 = new Componente(referenciaB22);
+            var referenciaB22 = new Referencia("B22", coste: 2);
+            var piezaB22 = new Pieza(referenciaB22);
 
-            conjuntoB2.Añadir(4, piezaB21);
+            conjuntoB2.Añadir(3, piezaB21);
             conjuntoB2.Añadir(2, piezaB22);
 
             conjuntoB.Añadir(5, piezaB1);
@@ -126,64 +145,302 @@ namespace CompositePattern
             return conjuntoB;
         }
 
+
+        public abstract class Componente
+        {
+            public abstract string Nombre { get; }
+
+            public abstract void Añadir(Componente componente);
+
+            public abstract void Quitar(Componente componente);
+
+            public abstract decimal CalcularCoste(int nivel);
+        }
+
         public class Referencia
         {
             public Referencia(string nombre, decimal coste)
             {
                 if (string.IsNullOrEmpty(nombre))
-                {
-                    throw new ArgumentException();
-                }
+                    throw new ArgumentException(nameof(nombre));
+
+                if (coste < 0)
+                    throw new ArgumentException(nameof(coste));
 
                 Nombre = nombre;
                 Coste = coste;
             }
-            public string Nombre { get;  }
+            public string Nombre { get; }
             public decimal Coste { get; }
         }
 
-            public class Componente
-            {
-                private readonly Referencia _referencia;
-                private readonly List<Componente> _subComponentes;
 
+        public class Pieza : Componente
+        {
+            private readonly Referencia _referencia;
 
-            public string Nombre
+            public Pieza(Referencia referencia)
             {
-                get { return _referencia.Nombre;  }
+                _referencia = referencia;
             }
 
-            public Componente(Referencia referencia)
+            public override string Nombre => _referencia.Nombre;
+
+            public override void Añadir(Componente componente)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Quitar(Componente componente)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override decimal CalcularCoste(int nivel)
+            {
+                Console.WriteLine(new String('-', nivel) + " Pieza: " + Nombre + " - Coste:" + _referencia.Coste);
+
+                return _referencia.Coste;
+            }
+        }
+
+        public class Conjunto : Componente
+        {
+            private readonly Referencia _referencia;
+            private readonly List<Componente> _subComponentes;
+
+
+            public override string Nombre
+            {
+                get { return _referencia.Nombre; }
+            }
+
+            public override void Añadir(Componente componente)
+            {
+                _subComponentes.Add(componente);
+            }
+
+            public override void Quitar(Componente componente)
+            {
+                _subComponentes.Remove(componente);
+            }
+
+            public Conjunto(Referencia referencia)
             {
                 _referencia = referencia;
                 _subComponentes = new List<Componente>();
             }
-            
+
             public void Añadir(int cantidad, Componente componente)
             {
                 for (int i = 0; i < cantidad; i++)
                 {
-                    _subComponentes.Add(componente);
+                    Añadir(componente);
                 }
             }
 
-            public void Quitar(Componente componente)
-            {
-                _subComponentes.Remove(componente);
-            }
-            
-            public decimal CalcularCoste()
+
+            public override decimal CalcularCoste(int nivel)
             {
                 decimal coste = _referencia.Coste;
 
+                Console.WriteLine(new String('-', nivel) + " " + Nombre + ": " + coste);
+
                 foreach (var componenteProducto in _subComponentes)
                 {
-                    coste = coste + componenteProducto.CalcularCoste();
+                    coste = coste + componenteProducto.CalcularCoste(nivel + 1);
                 }
 
                 return coste;
             }
         }
-        
+
+
+
+#endregion
+
+
+        #region Ejemplo segundo intento
+
+        private static void CalcularCostesDeUnProductoIntento2()
+        {
+            var conjunto = CrearConjuntoSegundoIntento();
+
+            Console.WriteLine("Coste de " + conjunto.Nombre + ":");
+            Console.WriteLine(conjunto.CalcularCoste(1));
+        }
+
+        private static ComponenteIntento2 CrearConjuntoSegundoIntento()
+        {
+            var referenciaB = new Referencia("B", 4);
+            var conjuntoB = new ComponenteIntento2(referenciaB);
+
+            var referenciaB1 = new Referencia("B1", 1);
+            var piezaB1 = new ComponenteIntento2(referenciaB1);
+
+            var referenciaB2 = new Referencia("B2", 2);
+            var conjuntoB2 = new ComponenteIntento2(referenciaB2);
+
+            var referenciaB21 = new Referencia("B21", 1);
+            var piezaB21 = new ComponenteIntento2(referenciaB21);
+
+            var referenciaB22 = new Referencia("B22", 2);
+            var piezaB22 = new ComponenteIntento2(referenciaB22);
+
+            conjuntoB2.Añadir(3, piezaB21);
+            conjuntoB2.Añadir(2, piezaB22);
+
+            conjuntoB.Añadir(5, piezaB1);
+            conjuntoB.Añadir(3, conjuntoB2);
+
+            return conjuntoB;
+        }
+
+        public class ComponenteIntento2
+        {
+            private readonly Referencia _referencia;
+            private readonly List<ComponenteIntento2> _subComponentes;
+
+
+            public string Nombre
+            {
+                get { return _referencia.Nombre; }
+            }
+
+            public void Añadir(ComponenteIntento2 componente)
+            {
+                _subComponentes.Add(componente);
+            }
+
+            public void Quitar(ComponenteIntento2 componente)
+            {
+                _subComponentes.Remove(componente);
+            }
+
+            public ComponenteIntento2(Referencia referencia)
+            {
+                _referencia = referencia;
+                _subComponentes = new List<ComponenteIntento2>();
+            }
+
+            public void Añadir(int cantidad, ComponenteIntento2 componente)
+            {
+                for (int i = 0; i < cantidad; i++)
+                {
+                    Añadir(componente);
+                }
+            }
+
+
+            public decimal CalcularCoste(int nivel)
+            {
+                decimal coste = _referencia.Coste;
+
+                Console.WriteLine(new String('-', nivel) + " " + Nombre + ": " + coste);
+
+                foreach (var componenteProducto in _subComponentes)
+                {
+                    coste = coste + componenteProducto.CalcularCoste(nivel + 1);
+                }
+
+                return coste;
+            }
+        }
+
+        #endregion
+
+        #region Ejemplo tercer intento
+
+        private static void CalcularCostesDeUnProductoIntento3()
+        {
+            var conjunto = CrearConjuntoTercerIntento();
+
+            Console.WriteLine("Coste de " + conjunto.Nombre + ":");
+            Console.WriteLine(conjunto.CalcularCoste(1));
+        }
+
+        private static ComponenteIntento3 CrearConjuntoTercerIntento()
+        {
+            var referenciaB = new Referencia("B", 4);
+            var conjuntoB = new ComponenteIntento3(referenciaB);
+
+            var referenciaB1 = new Referencia("B1", 1);
+            var piezaB1 = new ComponenteIntento3(referenciaB1);
+
+            var referenciaB2 = new Referencia("B2", 2);
+            var conjuntoB2 = new ComponenteIntento3(referenciaB2);
+
+            var referenciaB21 = new Referencia("B21", 1);
+            var piezaB21 = new ComponenteIntento3(referenciaB21);
+
+            var referenciaB22 = new Referencia("B22", 2);
+            var piezaB22 = new ComponenteIntento3(referenciaB22);
+
+            conjuntoB2.Añadir(3, piezaB21);
+            conjuntoB2.Añadir(2, piezaB22);
+
+            conjuntoB.Añadir(5, piezaB1);
+            conjuntoB.Añadir(3, conjuntoB2);
+
+            return conjuntoB;
+        }
+
+        public class ComponenteIntento3
+        {
+            private readonly Referencia _referencia;
+            private readonly List<ComponenteIntento3> _subComponentes;
+
+            public int Cantidad { get; set; }
+
+            public string Nombre
+            {
+                get { return _referencia.Nombre; }
+            }
+
+            public void Añadir(ComponenteIntento3 componente)
+            {
+                _subComponentes.Add(componente);
+            }
+
+            public void Quitar(ComponenteIntento3 componente)
+            {
+                _subComponentes.Remove(componente);
+            }
+
+            public ComponenteIntento3(Referencia referencia)
+            {
+                _referencia = referencia;
+                _subComponentes = new List<ComponenteIntento3>();
+                Cantidad = 1;
+            }
+
+            public void Añadir(int cantidad, ComponenteIntento3 componente)
+            {
+                componente.Cantidad = cantidad;
+                Añadir(componente);
+                
+            }
+
+
+            public decimal CalcularCoste(int nivel)
+            {
+                decimal coste = _referencia.Coste;
+
+                Console.WriteLine(new String('-', nivel) + $" {Nombre} - Coste: {coste} - Cantidad: {Cantidad}");
+
+                foreach (var componenteProducto in _subComponentes)
+                {
+                    coste = coste + componenteProducto.CalcularCoste(nivel + 1) 
+                                    * componenteProducto.Cantidad;
+                }
+
+                return coste;
+            }
+        }
+
+        #endregion
+
+
+
     }
 }
