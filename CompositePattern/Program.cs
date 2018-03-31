@@ -10,15 +10,11 @@ namespace CompositePattern
             // Ejemplo para la definición del patrón
             PintarUnArbol();
 
-            // Ejemplo de costes Intento 1
             CalcularCostesDeUnProductoIntento1();
 
-            // Ejempo de costes Intento 2
             CalcularCostesDeUnProductoIntento2();
 
-            // Ejempo de costes Intento 3
             CalcularCostesDeUnProductoIntento3();
-
 
             Console.ReadLine();
         }
